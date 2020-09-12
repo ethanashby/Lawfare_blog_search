@@ -5,13 +5,14 @@ This file calculates pagerank vectors for small-scale webgraphs.
 See the README.md for example usage.
 '''
 
+#pip3 install torch
+
 import math
 import torch
 import gzip
 import csv
 
 import logging
-
 
 class WebGraph():
 
@@ -103,7 +104,15 @@ class WebGraph():
             v = torch.ones(n)
 
         else:
-            v = torch.zeros(n)
+          v = torch.zeros(n)
+          import re
+          for i in range(0,n):
+            url=self._index_to_url(index=i)
+            if url_satisfies_query(url,query):
+              v[i]=1
+            else:
+              pass
+            
             # FIXME: your code goes here
         
         v_sum = torch.sum(v)
@@ -133,11 +142,82 @@ class WebGraph():
                 x0 = torch.unsqueeze(x0,1)
             x0 /= torch.norm(x0)
 
+            # compute "a" vector
+            # id dangling nodes, i.e. rows with sum=0. all dangling nodes get entry=1 and nondangling gets entry=0
+            # turn p to dense matrix and take rowsums
+            dn = self.P.to_dense().sum(axis=1)
+            a=(dn == 0).float().mul_(1)
+            a=a.unsqueeze(dim=1)
+              
             # main loop
-            # FIXME: your code goes here
-            x = x0.squeeze()
+            for i in range(0, max_iterations):
+                if i==0:
+                  #set the previous pagerank vector x^0 to the initialization vector
+                  xprev=x0
+                  #((dense * sparse)^T)^T= (sparse^T * dense^T)^T: matrix multiplication
+                  ds=torch.sparse.mm(self.P.t(), xprev).t()
+                  #multiply by scalar for part 1 of solution
+                  p1=alpha*ds
+                  #vector multiplications for part 2 of solution
+                  p2=(alpha*xprev.t() @ a + (1-alpha)) * v.t()
+                  #update pagerank vector x^1
+                  xnew=p1+p2
+                  #normalize the length of the updated pagerank vector
+                  xnew /= torch.norm(xnew)
+                  xnew=xnew.t()
+                  #test for convergence criteria
+                  x=0
+                  logging.debug("i:"+ str(i) + ", accuracy:"+  str(torch.norm(xnew-xprev).item()))
+                  if torch.norm(xnew-xprev) <= epsilon:
+                    x=xnew
+                    break
+                  else:
+                    pass
+                else:
+                  #set the previous pagerank vector x^(k-1) to the previous iterations pagerank vector
+                  xprev=xnew
+                  #((dense * sparse)^T)^T= (sparse^T * dense^T)^T: matrix multiplication
+                  ds=torch.sparse.mm(self.P.t(), xprev).t()
+                  #multiply by scalar for part 1 of solution
+                  p1=alpha*ds
+                  #vector multiplications for part 2 of solution
+                  p2=(alpha*xprev.t() @ a + (1-alpha)) * v.t()
+                  #update pagerank vector x^1
+                  xnew=p1+p2
+                  #normalize the length of the updated pagerank vector
+                  xnew /= torch.norm(xnew)
+                  xnew=xnew.t()
+                  #test for convergence criteria
+                  x=0
+                  logging.debug("i:"+ str(i) + ", accuracy:"+  str(torch.norm(xnew-xprev).item()))
+                  if torch.norm(xnew-xprev) <= epsilon:
+                    x=xnew
+                    break
+                  elif i==max_iterations:
+                    print("Reached maximum iterations without convergence")
+                  else:
+                    pass
+                  
+            #OR something like this
+            #while torch.norm(xnew-xprev) > epsilon:
+                #set pagerank vector from last iteration to previous vector
+                #xprev=xnew
+                #spare matrix multiplication in one half of the [ower method formula]
+                #ds=torch.sparse.mm(self.P.t(), xprev.t()).t()
+                ##part 1 of solution
+                #p1=alpha*ds
+                
+                #part 2 of solution
+                #p2=(alpha*xprev.t() @ a + (1-alpha)) @ v.t()
+                #updated pagerank vector
+                #xnew=p1+p2
+                #normalize the length of the updated pagerank vector
+                #xnew /= torch.norm(xnew)
+            
+            #return pagerank vector once convergence criteria are met
+            xf = x.squeeze()
 
-            return x
+            return xf
 
 
     def search(self, pi, query='', max_results=10):
