@@ -385,14 +385,14 @@ summary {
 
 <div id="goal" class="section level1">
 <h1>Goal</h1>
-<p>I want to build a search engine inspired by Google’s Pagerank for <a ref="https://www.lawfareblog.com"> Lawfare</a>, a website that provides legal analysis of issues pertaining to national security. The general idea is to exploit the linking structure of the website to assign high importance to pages that recieve links/connections from other pages. This is a prototype version of Google’s PageRank algorithm. Equations were sourced from <a ref="https://galton.uchicago.edu/~lekheng/meetings/mathofranking/ref/langville.pdf"><em>Deeper Inside Pagerank</em></a> and written in a python script <code>pagerank.py</code>.</p>
+<p>I want to build a search engine inspired by Google’s Pagerank for <a ref="https://www.lawfareblog.com"> Lawfare</a>, a website that provides legal analysis of issues pertaining to national security. The general idea is to exploit the linking structure of a website to assign high importance to pages that recieve links/connections from other pages. This is a prototype version of Google’s PageRank algorithm. Equations were sourced from <a ref="https://galton.uchicago.edu/~lekheng/meetings/mathofranking/ref/langville.pdf"><em>Deeper Inside Pagerank</em></a> and written in a python script <code>pagerank.py</code>.</p>
 </div>
 <div id="task-1-the-power-method" class="section level1">
 <h1>Task 1: The Power Method</h1>
-<p>Applying Google PageRank algorithm to a toy dataset and then the linking structure of the website above.</p>
+<p>I began by applying this PageRank algorithm to a toy dataset included in the <em>Deeper Inside Pagerank</em> paper to confirm that the algorithm was working correctly. After confirming that the algorithm ran correctly, I applied the algorithm to the linking structure of the Lawfare website. The power method involves an iterative sparse matrix multiplication, where the spare matrix is a primitive markov matrix of transition (linking) probabilities to each webpage. It also involves the addition of a personalization vector, which accounted for variability in teleportation behavior between web surfers, and more recently has been used to control the ranking of spam sites.</p>
 <div id="part-1-run-pagerank-on-toy-dataset" class="section level3">
 <h3>Part 1: Run PageRank on toy dataset</h3>
-<p>This dataset is sourced from the <em>Deeper Inside Pagerank</em> paper. This webpage ranking matches the output of the implementation on Professor Izbicki’s webpage. This means that my pagerank system is working correctly.</p>
+<p>This dataset was sourced from the <em>Deeper Inside Pagerank</em> paper. The ranking of webpages in the output below matches the output produced by Professor Mike Izbicki’s implementation. This means that my pagerank system is working correctly.</p>
 <pre><code>$ python3 pagerank.py --data=./small.csv.gz --verbose
 DEBUG:root:computing indices
 DEBUG:root:computing values
@@ -429,7 +429,7 @@ INFO:root:rank=5 pagerank=1.6917e-01 url=1</code></pre>
 </div>
 <div id="part-2-search-query" class="section level2">
 <h2>Part 2: Search Query</h2>
-<p>The <code>pagerank.py</code> file has an option for <code>--search-query</code>, which allows us to return pages related to some search term. This returns all urls that match the query string, ranked by PageRank. The following searches correspond to searches for coronavirus (or ‘corona’), Donald Trump (or ‘trump’), Iran (‘iran’), or Nuclear Weapons (“nuclear”).</p>
+<p>The <code>pagerank.py</code> file has an option for <code>--search-query</code>, which allows us to return pages related to a user-specified search term. This returns all urls that match the query string, sorted by the PageRank algorithm. The following searches correspond to searches for coronavirus (or ‘corona’), Donald Trump (or ‘trump’), Iran (‘iran’), or Nuclear Weapons (“nuclear”).</p>
 <pre><code>$ python3 pagerank.py --data=./lawfareblog.csv.gz --search_query=&#39;corona&#39;
 INFO:root:rank=0 pagerank=1.0038e-03 url=www.lawfareblog.com/lawfare-podcast-united-nations-and-coronavirus-crisis
 INFO:root:rank=1 pagerank=8.9226e-04 url=www.lawfareblog.com/house-oversight-committee-holds-day-two-hearing-government-coronavirus-response
@@ -480,7 +480,8 @@ INFO:root:rank=9 pagerank=5.2023e-04 url=www.lawfareblog.com/document-nuclear-po
 </div>
 <div id="part-3-filtering-pages-with-more-than-a-specified-fraction-to-eliminate-broad-pages" class="section level2">
 <h2>Part 3: Filtering pages with more than a specified fraction to eliminate broad pages</h2>
-<p>When we run the pagerank algorithm on all the LawFareBlog webpages (below), we tend to return really broad pages (like a homepage) that get linked to every article. Therefore these pages have really large pagerank. We’re not so interested in these pages… an easy way to remove pages with too many links is the <code>--filter_ratio</code> argument. This eliminates all pages that have more links than a specified fraction. If we run on `–filter_ratio=0.2’, we get the second output.</p>
+<p>When we run the pagerank algorithm on all the Lawfare webpages, we tend to return really broad pages (e.g. home webpages) that get linked to every article. These pages are then assigned a really high pagerank. This is shown in the first output chunk below.</p>
+<p>We may not be all that interested in these pages… an easy way to remove pages with too many links is the <code>--filter_ratio</code> argument. This eliminates all pages that have more links than a specified fraction. If we run on `–filter_ratio=0.2’, we get the second output chunk below.</p>
 <pre><code>Ethans-MacBook-Pro-2:Project 1 PageRank ethanashby$ python3 pagerank.py --data=./lawfareblog.csv.gz
 INFO:root:rank=0 pagerank=2.8741e-01 url=www.lawfareblog.com/about-lawfare-brief-history-term-and-site
 INFO:root:rank=1 pagerank=2.8741e-01 url=www.lawfareblog.com/lawfare-job-board
@@ -504,8 +505,9 @@ INFO:root:rank=7 pagerank=1.4957e-01 url=www.lawfareblog.com/todays-headlines-an
 INFO:root:rank=8 pagerank=1.4367e-01 url=www.lawfareblog.com/cyberlaw-podcast-mistrusting-google
 INFO:root:rank=9 pagerank=1.4240e-01 url=www.lawfareblog.com/lawfare-podcast-bonus-edition-gordon-sondland-vs-committee-no-bull</code></pre>
 </div>
-<div id="part-4-playing-with-convergence-parameters" class="section level2">
-<h2>Part 4: Playing with Convergence Parameters</h2>
+<div id="part-4-playing-with-algorithm-parameters" class="section level2">
+<h2>Part 4: Playing with Algorithm Parameters</h2>
+<p>Playing with the filter ratio and alpha (which determines the tradeoff between how much weight is given to the hyperlink web structure and how fast the algorithm converges) yield very different runtimes.</p>
 <pre><code>$ python3 pagerank.py --data=./lawfareblog.csv.gz --verbose
 $ python3 pagerank.py --data=./lawfareblog.csv.gz --verbose --alpha=0.99999
 $ python3 pagerank.py --data=./lawfareblog.csv.gz --verbose --filter_ratio=0.2

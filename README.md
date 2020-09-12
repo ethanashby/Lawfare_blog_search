@@ -7,11 +7,11 @@ output: html_document
 
 # Goal
 
-I want to build a search engine inspired by Google's Pagerank for <a ref="https://www.lawfareblog.com"> Lawfare</a>, a website that provides legal analysis of issues pertaining to national security. The general idea is to exploit the linking structure of the website to assign high importance to pages that recieve links/connections from other pages. This is a prototype version of Google's PageRank algorithm. Equations were sourced from <a ref="https://galton.uchicago.edu/~lekheng/meetings/mathofranking/ref/langville.pdf">*Deeper Inside Pagerank*</a> and written in a python script `pagerank.py`.
+I want to build a search engine inspired by Google's Pagerank for <a ref="https://www.lawfareblog.com"> Lawfare</a>, a website that provides legal analysis of issues pertaining to national security. The general idea is to exploit the linking structure of a website to assign high importance to pages that recieve links/connections from other pages. This is a prototype version of Google's PageRank algorithm. Equations were sourced from <a ref="https://galton.uchicago.edu/~lekheng/meetings/mathofranking/ref/langville.pdf">*Deeper Inside Pagerank*</a> and written in a python script `pagerank.py`.
 
 # Task 1: The Power Method
 
-I began by applying this PageRank algorithm to a toy dataset included in the *Deeper Inside Pagerank* paper to confirm that the algorithm was working correctly. Then I applied the algorithm to the linking structure of the Lawfare website.
+I began by applying this PageRank algorithm to a toy dataset included in the *Deeper Inside Pagerank* paper to confirm that the algorithm was working correctly. After confirming that the algorithm ran correctly, I applied the algorithm to the linking structure of the Lawfare website. The power method involves an iterative sparse matrix multiplication, where the spare matrix is a primitive markov matrix of transition (linking) probabilities to each webpage. It also involves the addition of a personalization vector, which accounted for variability in teleportation behavior between web surfers, and more recently has been used to control the ranking of spam sites.
 
 ### Part 1: Run PageRank on toy dataset
 
@@ -109,9 +109,9 @@ INFO:root:rank=9 pagerank=5.2023e-04 url=www.lawfareblog.com/document-nuclear-po
 
 ## Part 3: Filtering pages with more than a specified fraction to eliminate broad pages
 
-When we run the pagerank algorithm on all the Lawfare webpages, we tend to return really broad pages (like a homepage) that get linked to every article. Therefore these pages have really large pagerank. This is shown in the first output chunk below. 
+When we run the pagerank algorithm on all the Lawfare webpages, we tend to return really broad pages (e.g. home webpages) that get linked to every article. These pages are then assigned a really high pagerank. This is shown in the first output chunk below. 
 
-We may not be too interested in these pages... an easy way to remove pages with too many links is the `--filter_ratio` argument. This eliminates all pages that have more links than a specified fraction. If we run on `--filter_ratio=0.2', we get the second output chunk below.
+We may not be all that interested in these pages... an easy way to remove pages with too many links is the `--filter_ratio` argument. This eliminates all pages that have more links than a specified fraction. If we run on `--filter_ratio=0.2', we get the second output chunk below.
 
 ```
 Ethans-MacBook-Pro-2:Project 1 PageRank ethanashby$ python3 pagerank.py --data=./lawfareblog.csv.gz
@@ -143,7 +143,7 @@ INFO:root:rank=9 pagerank=1.4240e-01 url=www.lawfareblog.com/lawfare-podcast-bon
 
 ## Part 4: Playing with Algorithm Parameters
 
-When we play with 
+Playing with the filter ratio and alpha (which determines the tradeoff between how much weight is given to the hyperlink web structure and how fast the algorithm converges) yield very different runtimes.
 
 ```
 $ python3 pagerank.py --data=./lawfareblog.csv.gz --verbose
