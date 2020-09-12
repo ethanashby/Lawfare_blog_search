@@ -1,9 +1,6 @@
----
-title: "A Pagerank Algorithm to Mine a Website that Provides Legal Analysis of US National Security Issues"
-author: Ethan Ashby
-date: 09/09/2020
-output: html_document
----
+# A Pagerank Algorithm to Mine a Website that Provides Legal Analysis of US National Security Issues
+## Ethan Ashby
+## 09/09/2020
 
 # Goal
 
