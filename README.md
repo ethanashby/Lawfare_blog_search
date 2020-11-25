@@ -1,7 +1,26 @@
-# A Pagerank Algorithm to Mine a Website that Provides Legal Analysis of US National Security Issues
+# Using a Pagerank/Gensim Algorithm to Mine a Website Providing Legal Analysis of US National Security Issues
 ## Ethan Ashby
-## 09/09/2020
+## 11/25/2020
 
+# 11/25/2020: Including similar words in search query using gensim word similarity
+
+In the file `pagerank_2.py` I run the previously-developed implementation of the Google PageRank algorithm, but this time, including the top 5 most similar words for each query term in the search. Word similarity is determined using word embeddings from the `glove-twitter-25` training corpus available through `gensim`.
+
+```
+$ python3 pagerank_2.py --data=./lawfareblog.csv.gz --search_query='drones'
+INFO:root:rank=0 pagerank=0.004571518860757351 url=www.lawfareblog.com/why-did-you-wait-moral-emptiness-and-drone-strikes
+INFO:root:rank=1 pagerank=0.0031107424292713404 url=www.lawfareblog.com/dc-district-court-dismisses-journalists-drone-lawsuit
+INFO:root:rank=2 pagerank=0.0020231129601597786 url=www.lawfareblog.com/revived-cia-drone-strike-program-comments-new-policy
+INFO:root:rank=3 pagerank=0.0019667143933475018 url=www.lawfareblog.com/us-court-appeals-dc-circuit-dismisses-suit-over-us-drone-strike
+INFO:root:rank=4 pagerank=0.0017738215392455459 url=www.lawfareblog.com/whats-point-charging-foreign-state-linked-hackers
+INFO:root:rank=5 pagerank=0.0012884791940450668 url=www.lawfareblog.com/video-justice-department-announces-indictment-two-chinese-government-hackers
+INFO:root:rank=6 pagerank=0.0011972669744864106 url=www.lawfareblog.com/daisy-chain-associated-forces-potential-use-force-niger-against-al-mourabitoun
+INFO:root:rank=7 pagerank=0.001178761012852192 url=www.lawfareblog.com/iran-shoots-down-us-drone-domestic-and-international-legal-implications
+INFO:root:rank=8 pagerank=0.0011619674041867256 url=www.lawfareblog.com/slaughterbots-and-other-anticipated-autonomous-weapons-problems
+INFO:root:rank=9 pagerank=0.0011506405426189303 url=www.lawfareblog.com/dhss-joint-task-forces-next-chapter
+```
+
+# 09/09/2020: Writing and Testing the Pagerank Script
 # Goal
 
 I want to build a search engine inspired by Google's Pagerank for <a ref="https://www.lawfareblog.com"> Lawfare</a>, a website that provides legal analysis of issues pertaining to national security. The general idea is to exploit the linking structure of a website to assign high importance to pages that recieve links/connections from other pages. This is a prototype version of Google's PageRank algorithm. Equations were sourced from <a ref="https://galton.uchicago.edu/~lekheng/meetings/mathofranking/ref/langville.pdf">*Deeper Inside Pagerank*</a> and written in a python script `pagerank.py`.
